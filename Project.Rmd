@@ -1,0 +1,10 @@
+---
+title: "Project"
+output: html_notebook
+---
+# load the dataset
+```{r}
+df = read.csv("hotel_bookings.csv")
+df
+```
+
