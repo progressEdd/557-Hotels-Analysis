@@ -7,15 +7,24 @@ output: html_notebook
 hotel_bookings = read.csv("hotel_bookings.csv")
 hotel_bookings
 ```
+# cleaning data
+```{r}
+#hotel_bookings$is_canceled = factor(hotel_bookings$is_canceled)
+hotel_bookings$Reservation. = hotel_bookings$is_canceled
+
+hotel_bookings$Cancellation[hotel_bookings$Cancellation == 1] = "Canceled"
+hotel_bookings$Cancellation[hotel_bookings$Cancellation == 0] = "Not Canceled"
+hotel_bookings
+```
+
 # sarvesh's frequencies
 ```{r}
-cancelations.leadtime1 <- aggregate(lead_time ~ is_canceled + market_segment, data = hotel_bookings, FUN = mean)
-cancelations.leadtime2 <- aggregate(lead_time ~ market_segment + is_canceled, data = hotel_bookings, FUN = mean)
+cancelations.leadtime1 <- aggregate(lead_time ~ reservation_status + market_segment, data = hotel_bookings, FUN = mean)
+cancelations.leadtime2 <- aggregate(lead_time ~ market_segment + reservation_status, data = hotel_bookings, FUN = mean)
 cancelations.leadtime3 <- cancelations.leadtime2[c(2,1,3)]
 
-cancelations.leadtime1
+
 cancelations.leadtime2
-cancelations.leadtime3
 ```
 # multiple aggregations by segment
 ```{r}
@@ -26,17 +35,17 @@ multi$lead_time = round(multi$lead_time)
 multi
 
 multi_plot = ggplot(data = multi, mapping = aes(x = market_segment, y = lead_time, fill = hotel)) + xlab("Market Segment") + ylab("Lead Time") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
-            colour = "white", size = 5) + coord_flip()
+            colour = "black", size = 5) + coord_flip()
 multi_plot = multi_plot + labs(title = "Multiple Aggregations by Segment")
 multi_plot
 ```
 ```{r}
-multi2 <- aggregate(lead_time ~ is_canceled + hotel, data = hotel_bookings, FUN = mean)
+multi2 <- aggregate(lead_time ~ reservation_status + hotel, data = hotel_bookings, FUN = mean)
 multi2$lead_time = round(multi2$lead_time)
 multi2
 
-multi2_plot = ggplot(data = multi2, mapping = aes(x = hotel, y = lead_time, fill = is_canceled)) + xlab("Hotel Type") + ylab("Lead Time") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
-            colour = "white", size = 5) + coord_flip()
+multi2_plot = ggplot(data = multi2, mapping = aes(x = hotel, y = lead_time, fill = reservation_status)) + xlab("Hotel Type") + ylab("Lead Time") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
+            colour = "black", size = 5) + coord_flip()
 multi2_plot = multi2_plot + labs(title = "Multiple Aggregations by Segment")
 multi2_plot
 ```
