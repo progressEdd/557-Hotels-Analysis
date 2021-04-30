@@ -1,0 +1,78 @@
+---
+title: "R Notebook for Hotel Demand"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+#Loading all required packages
+```{R}
+library(rpart)   
+library(rpart.plot) 
+library(caret)
+library(ggplot2)
+library(randomForest)
+library(tibble)
+library(rattle)
+
+```
+#Loading the data set
+```{R}
+hotel_data <- read.csv("hotel_bookings.csv")
+```
+#Data Preparation and exploration hotel_data <- as_tibble(hotel_data) hotel_data$adr= as.factor(hotel_data$adr) 
+```{R}
+glimpse(hotel_data)
+hotel_data$hotel = as.factor(hotel_data$hotel)
+hotel_data$country = as.factor(hotel_data$country)                     
+hotel_data$market_segment= as.factor(hotel_data$market_segment)     hotel_data$distribution_channel=as.factor(hotel_data$distribution_channel) 
+hotel_data$reserved_room_type=as.factor(hotel_data$reserved_room_type)
+hotel_data$deposit_type= as.factor(hotel_data$deposit_type)
+hotel_data$customer_type= as.factor(hotel_data$customer_type) 
+hotel_data$reservation_status= as.factor(hotel_data$reservation_status) 
+hotel_data$is_canceled= as.factor(hotel_data$is_canceled) 
+```
+```{R}
+summary(hotel_data)
+nrow(hotel_data)   
+ncol(hotel_data)
+sum(is.na(hotel_data))
+hotel_data <- na.omit(hotel_data)
+```
+
+  
+#Decision tree tree <- rpart (mainTrainSet$hotel ~ . , mainTrainSet, method="class",control=rpart.control(cp = 0, maxdepth = 3)) fancyRpartPlot(tree)
+```{R}
+set.seed(100)
+dataPart <- createDataPartition (hotel_data$hotel, p=0.8, list=FALSE,times=1 )
+trainSet <- hotel_data[dataPart, ]
+testSet <- hotel_data[-dataPart, ]
+mainTrainSet <- trainSet[c('hotel','is_canceled','market_segment','arrival_date_month','lead_time','adr','reservation_status')]
+mainTestSet <- testSet[c('hotel','is_canceled','market_segment','arrival_date_month','lead_time','adr','reservation_status')]
+tree <- rpart(formula = is_canceled ~ hotel+market_segment+arrival_date_month,data = mainTrainSet, method = "class", parms = list(loss = matrix(c(0,1,1,0), nrow = 2)),cp = 0.001)
+#rpart.plot(tree,cex=0.45)
+#tree <- rpart(reservation_status ~ hotel+market_segment+arrival_date_month,data = mainTrainSet, method = "class", parms = list(loss = matrix(c(0,1,1,0), nrow = 2)),cp = 0.001)
+rpart.plot(tree,cex=0.45)
+#tree2 <- rpart(formula = hotel ~ market_segment+arrival_date_month+,data = mainTrainSet, method = "class", parms = list(loss = matrix(c(0,1,1,0), nrow = 2)),cp = 0.001)
+#rpart.plot(tree2,cex=0.45)
+```
+#Tree prediction and Confusion matrix
+```{R}
+mainTestSet <- mainTestSet[mainTestSet$market_segment!="Undefined", ]
+View(mainTestSet)
+predict_tree <- predict (tree, mainTestSet, type="class")
+table (predict_tree,mainTestSet$hotel)
+confusionMatrix(predict_tree,mainTestSet$hotel)
+```
+#Random forest
+```{R}
+Ran <- randomForest(reservation_status ~ hotel+market_segment+arrival_date_month,data=mainTrainSet,na.action=na.omit, ntree=500,importance=TRUE, mtry=3)
+Ran
+varImpPlot(Ran,type = 2)
+#getTree(Ran, 1, labelVar=TRUE)
+
+
+```
+
+```{R}
+
+```

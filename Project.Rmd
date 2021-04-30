@@ -2,12 +2,13 @@
 title: "Project"
 output: html_notebook
 ---
-# load the dataset
+# Data ETL
+## load the dataset
 ```{r}
 hotel_bookings = read.csv("hotel_bookings.csv")
 hotel_bookings
 ```
-# cleaning data
+## cleaning data
 ```{r}
 #hotel_bookings$is_canceled = factor(hotel_bookings$is_canceled)
 hotel_bookings$Reservation. = hotel_bookings$is_canceled
@@ -17,16 +18,9 @@ hotel_bookings$Cancellation[hotel_bookings$Cancellation == 0] = "Not Canceled"
 hotel_bookings
 ```
 
-# sarvesh's frequencies
-```{r}
-cancelations.leadtime1 <- aggregate(lead_time ~ reservation_status + market_segment, data = hotel_bookings, FUN = mean)
-cancelations.leadtime2 <- aggregate(lead_time ~ market_segment + reservation_status, data = hotel_bookings, FUN = mean)
-cancelations.leadtime3 <- cancelations.leadtime2[c(2,1,3)]
+# Summary Statistics
 
-
-cancelations.leadtime2
-```
-# multiple aggregations by segment
+## Hotel Leadtimes by Market Segment
 ```{r}
 library(ggplot2)
 
@@ -34,19 +28,48 @@ multi <- aggregate(lead_time ~ market_segment + hotel, data = hotel_bookings, FU
 multi$lead_time = round(multi$lead_time)
 multi
 
-multi_plot = ggplot(data = multi, mapping = aes(x = market_segment, y = lead_time, fill = hotel)) + xlab("Market Segment") + ylab("Lead Time") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
+multi_plot = ggplot(data = multi, mapping = aes(x = market_segment, y = lead_time, fill = hotel)) + xlab("Market Segment") + ylab("Lead Time (Rounded to Nearest day)") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
             colour = "black", size = 5) + coord_flip()
-multi_plot = multi_plot + labs(title = "Multiple Aggregations by Segment")
+multi_plot = multi_plot + labs(title = "Leadtimes by Market Segment")
 multi_plot
 ```
+## Mean Leadtime of Market Segments by Reservation Status
 ```{r}
-multi2 <- aggregate(lead_time ~ reservation_status + hotel, data = hotel_bookings, FUN = mean)
+#leadtime <- aggregate(lead_time ~ reservation_status + market_segment, data = hotel_bookings, FUN = mean)
+multi2 <- aggregate(lead_time ~ market_segment + reservation_status, data = hotel_bookings, FUN = mean)
 multi2$lead_time = round(multi2$lead_time)
-multi2
+#leadtime3 <- leadtime2[c(2,1,3)]
 
-multi2_plot = ggplot(data = multi2, mapping = aes(x = hotel, y = lead_time, fill = reservation_status)) + xlab("Hotel Type") + ylab("Lead Time") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
+multi2
+multi2_plot = ggplot(data = multi2, mapping = aes(x = market_segment, y = lead_time, fill = reservation_status)) + xlab("Hotel Type") + ylab("Lead Time (Rounded to Nearest day)") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
             colour = "black", size = 5) + coord_flip()
-multi2_plot = multi2_plot + labs(title = "Multiple Aggregations by Segment")
+multi2_plot = multi2_plot + labs(title = "Mean Leadtime by Hotel Type")
 multi2_plot
+```
+## Mean Leadtime by Hotel Type
+```{r}
+multi3 <- aggregate(lead_time ~ reservation_status + hotel, data = hotel_bookings, FUN = mean)
+multi3$lead_time = round(multi3$lead_time)
+multi3
+
+multi3_plot = ggplot(data = multi3, mapping = aes(x = hotel, y = lead_time, fill = reservation_status)) + xlab("Hotel Type") + ylab("Lead Time (Rounded to Nearest day)") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
+            colour = "black", size = 5) + coord_flip()
+multi3_plot = multi3_plot + labs(title = "Mean Leadtime by Hotel Type")
+multi3_plot
+```
+## Hotel Arrivals by Month
+```{r}
+Hotel_Arrival_Month <- table(hotel_bookings$hotel, hotel_bookings$arrival_date_month)
+Hotel_Arrival_Month
+
+multi3 <- aggregate(lead_time ~ reservation_status + hotel, data = hotel_bookings, FUN = mean)
+multi3$lead_time = round(multi3$lead_time)
+multi3
+
+multi3_plot = ggplot(data = multi3, mapping = aes(x = hotel, y = lead_time, fill = reservation_status)) + xlab("Hotel Type") + ylab("Lead Time (Rounded to Nearest day)") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
+            colour = "black", size = 5) + coord_flip()
+multi3_plot = multi3_plot + labs(title = "Mean Leadtime by Hotel Type")
+multi3_plot
+
 ```
 
