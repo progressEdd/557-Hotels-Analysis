@@ -8,17 +8,16 @@ output: html_notebook
 hotel_bookings = read.csv("hotel_bookings.csv")
 hotel_bookings
 ```
-## cleaning data
-```{r}
-#hotel_bookings$is_canceled = factor(hotel_bookings$is_canceled)
-hotel_bookings$Reservation. = hotel_bookings$is_canceled
-
-hotel_bookings$Cancellation[hotel_bookings$Cancellation == 1] = "Canceled"
-hotel_bookings$Cancellation[hotel_bookings$Cancellation == 0] = "Not Canceled"
-hotel_bookings
-```
 
 # Summary Statistics
+```{r}
+print("ADR")
+summary(hotel_bookings$adr)
+
+print("lead_time")
+
+summary(hotel_bookings$lead_time)
+```
 
 ## Hotel Leadtimes by Market Segment
 ```{r}
@@ -27,6 +26,7 @@ library(ggplot2)
 multi <- aggregate(lead_time ~ market_segment + hotel, data = hotel_bookings, FUN = mean)
 multi$lead_time = round(multi$lead_time)
 multi
+summary(multi)
 
 multi_plot = ggplot(data = multi, mapping = aes(x = market_segment, y = lead_time, fill = hotel)) + xlab("Market Segment") + ylab("Lead Time (Rounded to Nearest day)") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
             colour = "black", size = 5) + coord_flip()
@@ -38,12 +38,17 @@ multi_plot
 #leadtime <- aggregate(lead_time ~ reservation_status + market_segment, data = hotel_bookings, FUN = mean)
 multi2 <- aggregate(lead_time ~ market_segment + reservation_status, data = hotel_bookings, FUN = mean)
 multi2$lead_time = round(multi2$lead_time)
-#leadtime3 <- leadtime2[c(2,1,3)]
-
 multi2
-multi2_plot = ggplot(data = multi2, mapping = aes(x = market_segment, y = lead_time, fill = reservation_status)) + xlab("Hotel Type") + ylab("Lead Time (Rounded to Nearest day)") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
-            colour = "black", size = 5) + coord_flip()
-multi2_plot = multi2_plot + labs(title = "Mean Leadtime by Hotel Type")
+summary(multi2)
+
+
+multi2_plot = ggplot(data = multi2, mapping = aes(x = market_segment, y = lead_time, fill = reservation_status)) + 
+  xlab("Hotel Type") + 
+  ylab("Lead Time (Rounded to Nearest day)") + 
+  geom_col() + 
+  geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
+            colour = "black", size = 5) + coord_flip() +
+  labs(title = "Mean Leadtime by Hotel Type")
 multi2_plot
 ```
 ## Mean Leadtime by Hotel Type
@@ -51,22 +56,20 @@ multi2_plot
 multi3 <- aggregate(lead_time ~ reservation_status + hotel, data = hotel_bookings, FUN = mean)
 multi3$lead_time = round(multi3$lead_time)
 multi3
+summary(multi3)
 
 multi3_plot = ggplot(data = multi3, mapping = aes(x = hotel, y = lead_time, fill = reservation_status)) + xlab("Hotel Type") + ylab("Lead Time (Rounded to Nearest day)") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
             colour = "black", size = 5) + coord_flip()
 multi3_plot = multi3_plot + labs(title = "Mean Leadtime by Hotel Type")
 multi3_plot
 ```
-## Hotel Arrivals by Month
-```{r}
-Hotel_Arrival_Month <- table(hotel_bookings$hotel, hotel_bookings$arrival_date_month)
-Hotel_Arrival_Month
-```
+
 ## Arrival Date by Hotel Type
 ```{r}
 
 multi4 <- aggregate(reservation_status ~ arrival_date_month + hotel, data = hotel_bookings, FUN = length)
 multi4
+summary(multi4)
 
 multi4_plot = ggplot(data = multi4, mapping = aes(x = arrival_date_month, y = reservation_status, fill = hotel)) + xlab("Month") + ylab("Number of Reservations") + geom_col()+ geom_text(aes(label=reservation_status), position = position_stack(vjust= 0.5),
             colour = "black", size = 5) + coord_flip()
@@ -79,8 +82,9 @@ multi4_plot
 multi5 <- aggregate(adr ~ arrival_date_month + hotel, data = hotel_bookings, FUN = mean)
 multi5$adr = round(multi5$adr, digits = 2)
 multi5
+summary(multi5)
 
-multi5_plot = ggplot(data = multi5, mapping = aes(x = arrival_date_month, y = adr, fill = hotel)) + xlab("Month") + ylab("Average ADR (Rounded to Nearest ADR)") + geom_col()+ geom_text(aes(label=adr), position = position_stack(vjust= 0.5),
+multi5_plot = ggplot(data = multi5, mapping = aes(x = arrival_date_month, y = adr, fill = hotel)) + xlab("Month") + ylab("Average ADR (Rounded to 2 Decimal Points)") + geom_col()+ geom_text(aes(label=adr), position = position_stack(vjust= 0.5),
             colour = "black", size = 5) + coord_flip()
 multi5_plot = multi5_plot + labs(title = "Average Daily Rate per Hotel Across the Year")
 multi5_plot
