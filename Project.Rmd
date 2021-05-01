@@ -61,15 +61,29 @@ multi3_plot
 ```{r}
 Hotel_Arrival_Month <- table(hotel_bookings$hotel, hotel_bookings$arrival_date_month)
 Hotel_Arrival_Month
+```
+## Arrival Date by Hotel Type
+```{r}
 
-multi3 <- aggregate(lead_time ~ reservation_status + hotel, data = hotel_bookings, FUN = mean)
-multi3$lead_time = round(multi3$lead_time)
-multi3
+multi4 <- aggregate(reservation_status ~ arrival_date_month + hotel, data = hotel_bookings, FUN = length)
+multi4
 
-multi3_plot = ggplot(data = multi3, mapping = aes(x = hotel, y = lead_time, fill = reservation_status)) + xlab("Hotel Type") + ylab("Lead Time (Rounded to Nearest day)") + geom_col()+ geom_text(aes(label=lead_time), position = position_stack(vjust= 0.5),
+multi4_plot = ggplot(data = multi4, mapping = aes(x = arrival_date_month, y = reservation_status, fill = hotel)) + xlab("Month") + ylab("Number of Reservations") + geom_col()+ geom_text(aes(label=reservation_status), position = position_stack(vjust= 0.5),
             colour = "black", size = 5) + coord_flip()
-multi3_plot = multi3_plot + labs(title = "Mean Leadtime by Hotel Type")
-multi3_plot
+multi4_plot = multi4_plot + labs(title = "Arrival Date by Hotel Type")
+multi4_plot
+
+```
+## Average Daily Rate per Hotel Across the Year
+```{r}
+multi5 <- aggregate(adr ~ arrival_date_month + hotel, data = hotel_bookings, FUN = mean)
+multi5$adr = round(multi5$adr, digits = 2)
+multi5
+
+multi5_plot = ggplot(data = multi5, mapping = aes(x = arrival_date_month, y = adr, fill = hotel)) + xlab("Month") + ylab("Average ADR (Rounded to Nearest ADR)") + geom_col()+ geom_text(aes(label=adr), position = position_stack(vjust= 0.5),
+            colour = "black", size = 5) + coord_flip()
+multi5_plot = multi5_plot + labs(title = "Average Daily Rate per Hotel Across the Year")
+multi5_plot
 
 ```
 
