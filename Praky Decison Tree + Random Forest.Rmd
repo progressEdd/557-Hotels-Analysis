@@ -12,7 +12,6 @@ library(caret)
 library(ggplot2)
 library(randomForest)
 library(tibble)
-library(rattle)
 
 ```
 #Loading the data set
@@ -24,7 +23,8 @@ hotel_data <- read.csv("hotel_bookings.csv")
 glimpse(hotel_data)
 hotel_data$hotel = as.factor(hotel_data$hotel)
 hotel_data$country = as.factor(hotel_data$country)                     
-hotel_data$market_segment= as.factor(hotel_data$market_segment)     hotel_data$distribution_channel=as.factor(hotel_data$distribution_channel) 
+hotel_data$market_segment= as.factor(hotel_data$market_segment)     
+hotel_data$distribution_channel=as.factor(hotel_data$distribution_channel) 
 hotel_data$reserved_room_type=as.factor(hotel_data$reserved_room_type)
 hotel_data$deposit_type= as.factor(hotel_data$deposit_type)
 hotel_data$customer_type= as.factor(hotel_data$customer_type) 
@@ -50,29 +50,38 @@ mainTrainSet <- trainSet[c('hotel','is_canceled','market_segment','arrival_date_
 mainTestSet <- testSet[c('hotel','is_canceled','market_segment','arrival_date_month','lead_time','adr','reservation_status')]
 tree <- rpart(formula = is_canceled ~ hotel+market_segment+arrival_date_month,data = mainTrainSet, method = "class", parms = list(loss = matrix(c(0,1,1,0), nrow = 2)),cp = 0.001)
 #rpart.plot(tree,cex=0.45)
-#tree <- rpart(reservation_status ~ hotel+market_segment+arrival_date_month,data = mainTrainSet, method = "class", parms = list(loss = matrix(c(0,1,1,0), nrow = 2)),cp = 0.001)
-rpart.plot(tree,cex=0.45)
+tree <- rpart(reservation_status ~ hotel+market_segment+arrival_date_month,data = mainTrainSet, method = "class", cp = 0.001)
+tree1 <- rpart(reservation_status ~ hotel+market_segment+arrival_date_month+adr+lead_time,data = mainTrainSet, method = "class", cp = 0.001)
+tree2 <- rpart(reservation_status ~ lead_time,data = mainTrainSet, method = "class", cp = 0.001)
+tree3 <- rpart(reservation_status ~ adr,data = mainTrainSet, method = "class", cp = 0.001)
 #tree2 <- rpart(formula = hotel ~ market_segment+arrival_date_month+,data = mainTrainSet, method = "class", parms = list(loss = matrix(c(0,1,1,0), nrow = 2)),cp = 0.001)
 #rpart.plot(tree2,cex=0.45)
+```
+```{r}
+rpart.plot(tree1,cex=0.6)
+rpart.plot(tree,cex=0.6, type = 1)
+rpart.plot(tree2,cex=0.6, type = 1)
+rpart.plot(tree3,cex=0.6, type = 4)
+```
+
+#Tree pruning
+```{r}
+printcp (tree)
+plotcp (tree)
+ptree <- prune (tree, cp=tree$cptable[which.min(tree$cptable[,"xerror"]), "CP"])
+rpart.plot(ptree,type=4,cex=.6)
 ```
 #Tree prediction and Confusion matrix
 ```{R}
 mainTestSet <- mainTestSet[mainTestSet$market_segment!="Undefined", ]
-View(mainTestSet)
 predict_tree <- predict (tree, mainTestSet, type="class")
-table (predict_tree,mainTestSet$hotel)
-confusionMatrix(predict_tree,mainTestSet$hotel)
+table (predict_tree,mainTestSet$reservation_status)
+confusionMatrix(predict_tree,mainTestSet$reservation_status)
 ```
 #Random forest
 ```{R}
-Ran <- randomForest(reservation_status ~ hotel+market_segment+arrival_date_month,data=mainTrainSet,na.action=na.omit, ntree=500,importance=TRUE, mtry=3)
+Ran <- randomForest(reservation_status ~ hotel+market_segment+arrival_date_month+adr+lead_time,data=mainTrainSet,na.action=na.omit, ntree=500,importance=TRUE, mtry=3)
 Ran
 varImpPlot(Ran,type = 2)
-#getTree(Ran, 1, labelVar=TRUE)
-
-
-```
-
-```{R}
-
+getTree(Ran, 1, labelVar=TRUE)
 ```
